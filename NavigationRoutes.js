@@ -15,3 +15,11 @@ function adjList(islands, routes) {
 
   return graph;
 }
+
+const islands = ["Hawaii", "Tahiti", "Samoa", "New Zealand"];
+
+const routes= [
+  { src: "Hawaii", dest: "Tahiti", time: 7 },
+];
+
+console.log(adjList(islands, routes));
