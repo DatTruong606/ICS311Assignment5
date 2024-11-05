@@ -5,6 +5,7 @@ class Island {
         this.resources = resources;
         this.experiences = experiences;
         this.routes = [];
+        this.lastVisit = -1;
     }
 
     addEdge(destination, time) {
@@ -34,7 +35,7 @@ class Graph {
             const lastVisit = currentTime - island.lastVisit;
             return island.population / lastVisit;
         }
-        return 0;
+        return island.population; // If never visited, prioritize by population
     }
 
     findNextIsland(currentTime) {
@@ -84,6 +85,7 @@ class Graph {
         return nearestIsland;
     }
 
+    // Shortest paths for resource/people distribution
     dijkstra(startingIsland) {
         const distances = new Map();
         const unvisited = new Set(this.islands.keys());
@@ -95,8 +97,12 @@ class Graph {
 
         while (unvisited.size > 0) {
             let currentIslandName = this.getNearestIsland(unvisited, distances);
+            if (!currentIslandName) break; // No more reachable islands
+
             unvisited.delete(currentIslandName);
             const currentIsland = this.islands.get(currentIslandName);
+
+            if (!currentIsland) continue; // Ensure currentIsland is defined
 
             for (const route of currentIsland.routes) {
                 const { destination, time } = route;
