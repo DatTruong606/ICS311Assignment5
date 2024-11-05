@@ -29,6 +29,45 @@ class Graph {
         }
     }
 
+    score(island, currentTime) {
+        if (island.lastVisit !== -1) {
+            const lastVisit = currentTime - island.lastVisit;
+            return island.population / lastVisit;
+        }
+        return 0;
+    }
+
+    findNextIsland(currentTime) {
+        const unvisited = Array.from(this.islands.values()).filter(island => island.lastVisit === -1);
+        let maxScore = -Infinity;
+        let nextIsland = null;
+
+        for (const island of unvisited) {
+            const score = this.score(island, currentTime);
+            if (score > maxScore) {
+                maxScore = score;
+                nextIsland = island;
+            }
+        }
+
+        return nextIsland;
+    }
+
+    knowledgeSharing(startingIslandName) {
+        let currentTime = 0;
+        const visitedIslands = [];
+
+        let currentIsland = this.islands.get(startingIslandName);
+        while (currentIsland) {
+            currentIsland.lastVisit = currentTime;
+            visitedIslands.push(currentIsland.name);
+            currentTime += 1; // Increment time for each visit
+            currentIsland = this.findNextIsland(currentTime);
+        }
+
+        return visitedIslands;
+    }
+
     // Helper function for effectiveTourism
     // Find the island with the lowest weight/time
     getNearestIsland(unvisited, distances) {
@@ -43,6 +82,33 @@ class Graph {
             }
         }
         return nearestIsland;
+    }
+
+    dijkstra(startingIsland) {
+        const distances = new Map();
+        const unvisited = new Set(this.islands.keys());
+
+        for (let island of this.islands.values()) {
+            distances.set(island.name, Infinity);
+        }
+        distances.set(startingIsland, 0);
+
+        while (unvisited.size > 0) {
+            let currentIslandName = this.getNearestIsland(unvisited, distances);
+            unvisited.delete(currentIslandName);
+            const currentIsland = this.islands.get(currentIslandName);
+
+            for (const route of currentIsland.routes) {
+                const { destination, time } = route;
+                const newDistance = distances.get(currentIslandName) + time;
+
+                if (newDistance < distances.get(destination)) {
+                    distances.set(destination, newDistance);
+                }
+            }
+        }
+
+        return distances;
     }
 
     // Using djikstra's algorithm
