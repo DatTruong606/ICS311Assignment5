@@ -1,0 +1,2 @@
+function adjList(islands, routes) {
+}
